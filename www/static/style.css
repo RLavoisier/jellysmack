@@ -1,0 +1,11 @@
+body {
+    background-image: url("images/bg.png");
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+table tbody td img, .pres-img {
+    display:block;
+    width: 100%;
+    height: 100%;
+}

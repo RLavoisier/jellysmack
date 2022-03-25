@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+    {% raw %}
+    <table class="table table-hover table-light">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Species</th>
+                <th>Gender</th>
+                <th>Type</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr v-for="character in characters">
+                <td><a v-bind:href="'/characters/' + character.id">{{ character.name }}</a></td>
+                <td>{{ character.species }}</td>
+                <td>{{ character.gender }}</td>
+                <td>{{ character.type }}</td>
+                <td>{{ character.status }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endraw %}
+    {% if pagination["page"] > 1 %}<a href="/characters?page=1">&lt;&lt;first</a>{% endif %}
+    {% if pagination["previous"] %}<a href="/characters?page={{ pagination["previous"] }}">&lt;previous</a>{% endif %}
+    {{ pagination["page"] }} / {{ pagination["last"] }}
+    {% if pagination["next"] %}<a href="/characters?page={{ pagination["next"] }}">next&gt;</a>{% endif %}
+    {% if pagination["last"] > pagination["page"] %}<a href="/characters?page={{ pagination["last"] }}">last&gt;&gt;</a>{% endif %}
+
+{% endblock %}
+{% block vuejs %}
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                characters: {{ characters|tojson }}
+            }
+        });
+        $(document).ready(function() {
+            $('.table').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+            });
+        } );
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+    {% raw %}
+    <h5>Air date : {{ episode.air_date }}</h5>
+    <div class="row">
+    <div class="col-2"></div>
+    <div class="col-8"><img class="pres-img" v-bind:src="episode.image" /></div>
+    <div class="col-2"></div>
+    </div>
+    <h3>Plot</h3>
+    <p>{{ episode.plot }}</p>
+    <h3>Characters</h3>
+        <table class="table table-hover table-light">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Species</th>
+                <th>Gender</th>
+                <th>Type</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr v-for="character in episode.characters">
+                <td><a v-bind:href="'/characters/' + character.id">{{ character.name }}</a></td>
+                <td>{{ character.species }}</td>
+                <td>{{ character.gender }}</td>
+                <td>{{ character.type }}</td>
+                <td>{{ character.status }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3>Comments</h3>
+        <table class="table table-hover table-light table-comment">
+            <thead>
+                <tr>
+                    <th>Author</th>
+                    <th>Date</th>
+                    <th>Character</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="comment in episode.comments">
+                    <td>{{ comment.author }}</td>
+                    <td>{{ comment.posted_on }}</td>
+                    <td><a v-if="comment.character_id" v-bind:href="'/characters/' + comment.character_id">{{ comment.character }}</a></td>
+                    <td>{{ comment.comment }}</td>
+                </tr>
+            </tbody>
+        </table>
+    <h3>Post comments</h3>
+    <form @submit="postComment" method="post">
+        <div class="row">
+            <div class="col-2">
+                <label for="author" class="form-label">Author:</label>
+                <input v-model="author" type="text" class="form-control" name="author" required>
+            </div>
+            <div class="col-2">
+                <label for="episode_id" class="form-label">For character:</label>
+                <select v-model="character_id" class="form-select" name="character_id" id="character_id">
+                    <option></option>
+                    <option v-for="character in episode.characters" v-bind:value=character.id>{{ character.name }}</option>
+                </select>
+            </div>
+            <div class="col-8">
+                <label for="comment" class="form-label">Comment:</label>
+                <input v-model="comment" type="text" class="form-control" name="comment" required>
+            </div>
+
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    {% endraw %}
+
+{% endblock %}
+{% block vuejs %}
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                episode: {{ episode|tojson }},
+                author: null,
+                comment: null,
+                character_id: null
+            },
+            methods:{
+                postComment(e){
+                    e.preventDefault();
+                    axios.post(
+                        "http://127.0.0.1:8000/comments",
+                        {
+                            author: this.author,
+                            comment: this.comment,
+                            episode_id: this.episode.id,
+                            character_id: this.character_id
+                        }
+                    ).then(response => {
+                        this.episode.comments.push(response.data)
+                    })
+                }
+            }
+        });
+        $(document).ready(function() {
+            $('.table').DataTable({
+                "searching": false,
+                "info": false,
+            });
+        } );
+</script>
+{% endblock %}

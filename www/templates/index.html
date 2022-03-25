@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+    <table class="table table-hover table-light">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Episode</th>
+                <th>Name</th>
+                <th>Air date</th>
+                <th>Plot</th>
+            </tr>
+        </thead>
+        <tbody>
+                {% raw %}
+                    <tr v-for="episode in episodes">
+                        <td style="width:10%"><img v-bind:src="episode.image" /></td>
+                        <td><a v-bind:href="'/episodes/' + episode.id">{{ episode.episode }}</a></td>
+                        <td>{{ episode.name }}</td>
+                        <td style="width:10%">{{ episode.air_date }}</td>
+                        <td>{{ episode.plot }}</td>
+                    </tr>
+                {% endraw %}
+        </tbody>
+    </table>
+    {% if pagination["page"] > 1 %}<a href="/?page=1">&lt;&lt;first</a>{% endif %}
+    {% if pagination["previous"] %}<a href="/?page={{ pagination["previous"] }}">&lt;previous</a>{% endif %}
+    {{ pagination["page"] }} / {{ pagination["last"] }}
+    {% if pagination["next"] %}<a href="/?page={{ pagination["next"] }}">next&gt;</a>{% endif %}
+    {% if pagination["last"] > pagination["page"] %}<a href="/?page={{ pagination["last"] }}">last&gt;&gt;</a>{% endif %}
+
+
+{% endblock %}
+{% block vuejs %}
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                episodes: {{ episodes|tojson }}
+            }
+        });
+        $(document).ready(function() {
+            $('.table').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
+            });
+        } );
+</script>
+{% endblock %}

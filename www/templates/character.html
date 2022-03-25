@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+    {% raw %}
+    <div class="row">
+        <div class="col-3"><h3>Species</h3></div>
+        <div class="col-3"><h3>Type</h3></div>
+        <div class="col-3"><h3>Gender</h3></div>
+        <div class="col-3"><h3>Status</h3></div>
+    </div>
+    <div class="row">
+        <div class="col-3">{{ character.species }}</div>
+        <div class="col-3">{{ character.type }}</div>
+        <div class="col-3">{{ character.gender }}</div>
+        <div class="col-3">{{ character.status }}</div>
+    </div>
+    <h3>Episode appearance</h3>
+        <table class="table table-hover table-light">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Episode</th>
+                    <th>Name</th>
+                    <th>Air date</th>
+                    <th>Plot</th>
+                </tr>
+            </thead>
+            <tbody>
+                        <tr v-for="episode in character.episodes">
+                            <td style="width:10%"><img v-bind:src="episode.image" /></td>
+                            <td><a v-bind:href="'/episodes/' + episode.id">{{ episode.episode }}</a></td>
+                            <td>{{ episode.name }}</td>
+                            <td style="width:10%">{{ episode.air_date }}</td>
+                            <td>{{ episode.plot }}</td>
+                        </tr>
+            </tbody>
+        </table>
+    <h3>Comments</h3>
+        <table class="table table-hover table-light table-comment">
+            <thead>
+                <tr>
+                    <th>Author</th>
+                    <th>Date</th>
+                    <th>Episode</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="comment in character.comments">
+                    <td>{{ comment.author }}</td>
+                    <td>{{ comment.posted_on }}</td>
+                    <td><a v-bind:href="'/episodes/' + comment.episode_id">{{ comment.episode }}</a></td>
+                    <td>{{ comment.comment }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    <h3>Post comments</h3>
+    <form @submit="postComment" method="post">
+        <div class="row">
+            <div class="col-2">
+                <label for="author" class="form-label">Author:</label>
+                <input v-model="author" type="text" class="form-control" name="author" required>
+            </div>
+            <div class="col-2">
+                <label for="episode_id" class="form-label">For episode:</label>
+                <select v-model="episode_id" class="form-select" name="episode_id" id="episode_id">
+                    <option></option>
+                    <option v-for="episode in character.episodes" v-bind:value=episode.id>{{ episode.episode }} - {{ episode.name }}</option>
+                </select>
+            </div>
+            <div class="col-8">
+                <label for="comment" class="form-label">Comment:</label>
+                <input v-model="comment" type="text" class="form-control" name="comment" required>
+            </div>
+
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    {% endraw %}
+{% endblock %}
+{% block vuejs %}
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                character: {{ character|tojson }},
+                author: null,
+                comment: null,
+                episode_id: null
+            },
+            methods:{
+                postComment(e){
+                    e.preventDefault();
+                    axios.post(
+                        "http://127.0.0.1:8000/comments",
+                        {
+                            author: this.author,
+                            comment: this.comment,
+                            episode_id: this.episode_id,
+                            character_id: this.character.id
+                        }
+                    ).then(response => {
+                        this.character.comments.push(response.data)
+                    })
+                }
+            }
+        });
+        $(document).ready(function() {
+            $('.table').DataTable({
+                "searching": false,
+                "info": false,
+            });
+        } );
+</script>
+{% endblock %}
